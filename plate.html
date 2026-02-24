@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 马年专属 | 记忆宫殿单词记忆（149词沉浸式版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E53E3E', // 马年红
+                        secondary: '#ED8936', // 金秋橙
+                        accent: '#4299E1', // 宁静蓝
+                        neutral: '#2D3748', // 深灰
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Poppins', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+            .scene-transition {
+                transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+            }
+            .hover-scale {
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.05);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            .word-highlight {
+                @apply relative cursor-help font-semibold text-primary hover:bg-primary/10 px-1 rounded inline-block;
+            }
+            .tooltip {
+                @apply absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-md bg-neutral text-white text-xs rounded p-2 shadow-lg z-50 hidden;
+            }
+            .word-highlight:hover .tooltip {
+                display: block;
+            }
+            .animate-float {
+                animation: float 6s ease-in-out infinite;
+            }
+            .animate-float-slow {
+                animation: float 8s ease-in-out infinite;
+            }
+            .animate-bounce-slow {
+                animation: bounce 3s ease-in-out infinite;
+            }
+            .animate-spin-slow {
+                animation: spin 20s linear infinite;
+            }
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-15px); }
+                100% { transform: translateY(0px); }
+            }
+            .card-center-container {
+                @apply absolute inset-0 flex items-center justify-center p-4;
+            }
+            /* 固定圆形语言切换按钮样式 */
+            .fixed-lang-btn {
+                @apply fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center z-50 transition-all hover:bg-primary/90 hover:scale-110;
+            }
+            /* 场景背景样式 */
+            .scene-bg {
+                @apply absolute inset-0 w-full h-full object-cover z-0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col m-0 p-0 overflow-hidden">
+    <!-- Header - 整合场景切换按钮 -->
+    <header class="bg-gradient-to-r from-primary to-secondary text-white shadow-md sticky top-0 z-40 w-full">
+        <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center gap-2 mb-2 md:mb-0">
+                <i class="fa fa-horse text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold">记忆宫殿 | 149词沉浸式记忆</h1>
+            </div>
+            
+            <!-- 场景切换按钮 - 嵌入标题栏 -->
+            <div class="flex items-center gap-3 mb-2 md:mb-0">
+                <button id="prev-btn" class="flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition text-sm">
+                    <i class="fa fa-arrow-left"></i> 上一场景
+                </button>
+                <button id="next-btn" class="flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition text-sm">
+                    下一场景 <i class="fa fa-arrow-right"></i>
+                </button>
+                
+                <span id="scene-indicator" class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">
+                    场景 1/5：晨光办公室
+                </span>
+                
+                <button id="audio-btn" class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition">
+                    <i class="fa fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content - 全屏布局 -->
+    <main class="flex-grow w-full h-[calc(100vh-64px)] overflow-hidden p-0 m-0">
+        <!-- Palace Scenes Container - 全屏覆盖 -->
+        <div id="palace-container" class="relative w-full h-full rounded-0 overflow-hidden shadow-none">
+            <!-- Scene 1: 晨光办公室（锚点：办公桌→文件柜→咖啡机） -->
+            <div class="scene absolute w-full h-full scene-transition" data-scene="1" data-title="晨光办公室" data-desc="职场工作与管理（76词）" data-lang="zh">
+                <!-- 写实风格背景图 -->
+                <img src="https://picsum.photos/id/42/1920/1080" alt="晨光办公室场景" class="scene-bg">
+                
+                <!-- Main Text Card - 缩小卡片尺寸（75%） -->
+                <div class="card-center-container">
+                    <div class="w-[70%] bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl p-4 md:p-6 hover-scale max-h-[90%] overflow-y-auto card-content text-sm md:text-base">
+                        <h3 class="text-lg md:text-xl font-bold text-neutral mb-3 flex items-center gap-2 scene-title">
+                            <i class="fa fa-briefcase text-primary"></i> 
+                            晨光办公室（锚点：办公桌→文件柜→咖啡机）
+                        </h3>
+                        <div class="text-gray-700 leading-relaxed mb-3">
+                            <!-- 锚点1：办公桌 -->
+                            推开玻璃门，晨光斜铺在<span class="word-highlight">polished<span class="tooltip">polished: adj. 抛光的，精致的（补充词）</span></span>木质<span class="word-highlight">desk<span class="tooltip">desk: n. 办公桌（补充词）</span></span>上，你坐下来，指尖先<span class="word-highlight">identify<span class="tooltip">identify: v. 识别，确定</span></span>识别桌上散落的项目文件，用红笔<span class="word-highlight">determine<span class="tooltip">determine: v. 确定，决定</span></span>优先级——这是你负责的新项目，绝不能让指尖敲键盘时，肩颈的<span class="word-highlight">pressure<span class="tooltip">pressure: n. 压力</span></span>随截止日期逼近变成<span class="word-highlight">stress<span class="tooltip">stress: n. 压力</span></span>。<br><br>
+                            
+                            <!-- 锚点2：文件柜 -->
+                            转身走向旋转<span class="word-highlight">file cabinet<span class="tooltip">file cabinet: n. 文件柜（补充词）</span></span>，指尖划过冰凉的金属柜门，<span class="word-highlight">access<span class="tooltip">access: v. 获取；n. 通道</span></span>获取里面的核心数据，快速<span class="word-highlight">track<span class="tooltip">track: n. 轨迹；v. 跟踪；keep track of: 跟踪，了解</span></span>跟踪上月的业绩曲线，<span class="word-highlight">keep track of<span class="tooltip">keep track of: 跟踪，了解</span></span>掌握每一笔<span class="word-highlight">account<span class="tooltip">account: n. 账目，账户</span></span>的流向。即便数据有<span class="word-highlight">negative<span class="tooltip">negative: adj. 负面的</span></span>波动，你也能冷静<span class="word-highlight">contain<span class="tooltip">contain: v. 遏制，包含</span></span>风险，尽管困难，绝不流露<span class="word-highlight">negative<span class="tooltip">negative: adj. 负面的</span></span>情绪，始终保持<span class="word-highlight">positive<span class="tooltip">positive: adj. 积极的，正面的</span></span>的态度。<br><br>
+                            
+                            <!-- 锚点3：咖啡机 -->
+                            走到窗边<span class="word-highlight">coffee machine<span class="tooltip">coffee machine: n. 咖啡机（补充词）</span></span>旁，倒一杯热拿铁，蒸汽里你<span class="word-highlight">reflect<span class="tooltip">reflect: v. 反思，反映</span></span>：要<span class="word-highlight">expand<span class="tooltip">expand: v. 扩大，拓展</span></span>业务<span class="word-highlight">scale<span class="tooltip">scale: n. 规模；v. 攀登</span></span>，就得先<span class="word-highlight">enhance<span class="tooltip">enhance: v. 提升，增强</span></span>团队<span class="word-highlight">performance<span class="tooltip">performance: n. 表现，业绩</span></span>。你<span class="word-highlight">adopt<span class="tooltip">adopt: v. 采用，采纳</span></span>新的工作方法，<span class="word-highlight">conduct<span class="tooltip">conduct: v. 开展，实施</span></span>开展高效会议，<span class="word-highlight">combat<span class="tooltip">combat: v. 对抗，应对</span></span>应对低效内耗，用<span class="word-highlight">effective<span class="tooltip">effective: adj. 有效的</span></span>策略替代无用忙碌——这才是<span class="word-highlight">professional<span class="tooltip">professional: adj. 专业的；n. 专业人士</span></span>职场人的选择。<br><br>
+                            
+                            <!-- 场景延伸（补充剩余核心词） -->
+                            你<span class="word-highlight">figure out<span class="tooltip">figure out: 弄明白，找出</span></span>成本<span class="word-highlight">expense<span class="tooltip">expense: n. 开支，费用</span></span>的优化空间，<span class="word-highlight">ensure<span class="tooltip">ensure: v. 确保，保证</span></span>确保每一笔<span class="word-highlight">fund<span class="tooltip">fund: n. 资金；v. 资助</span></span>都用在<span class="word-highlight">critical<span class="tooltip">critical: adj. 关键的，批评的</span></span>环节。你<span class="word-highlight">identify<span class="tooltip">identify: v. 识别，确定</span></span>问题<span class="word-highlight">source<span class="tooltip">source: n. 源头，来源</span></span>，转变工作重心，在<span class="word-highlight">current<span class="tooltip">current: adj. 当前的；n. 水流</span></span>当前市场<span class="word-highlight">trend<span class="tooltip">trend: n. 趋势，潮流</span></span>下，用智慧的<span class="word-highlight">management<span class="tooltip">management: n. 管理，管理层</span></span>抓住每一个机会，<span class="word-highlight">seek<span class="tooltip">seek: v. 寻找，寻求</span></span>寻求让<span class="word-highlight">consumers<span class="tooltip">consumer: n. 消费者</span></span>满意的解决方案。
+                        </div>
+                        <div class="text-gray-600 text-xs md:text-sm border-t border-gray-200 pt-2">
+                            <p>推开玻璃门，晨光斜铺在光亮的木质办公桌上，你坐下来，先识别桌上散落的项目文件，用红笔确定优先级——这是你负责的新项目，绝不能让指尖敲键盘时，肩颈的压力随截止日期逼近变成焦虑。<br><br>
+                            转身走向旋转文件柜，指尖划过冰凉的金属柜门，调取里面的核心数据，快速跟踪上月的业绩曲线，掌握每一笔账目的流向。即便数据有负面波动，你也能冷静遏制风险，尽管困难重重，绝不流露负面情绪，始终保持积极的态度。<br><br>
+                            走到窗边咖啡机旁，倒一杯热拿铁，蒸汽里你反思：要扩大业务规模，就得先提升团队业绩。你采用新的工作方法，开展高效会议，应对低效内耗，用有效的策略替代无用忙碌——这才是专业职场人的选择。<br><br>
+                            你理清成本开支的优化空间，确保每一笔资金都用在关键环节。你找准问题根源，转变工作重心，在当前市场趋势下，用智慧的管理抓住每一个机会，寻求让消费者满意的解决方案。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 1 英文版本 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="1" data-title="Morning Office" data-desc="Workplace & Management (76 words)" data-lang="en">
+                <img src="https://picsum.photos/id/42/1920/1080" alt="Morning Office Scene" class="scene-bg">
+                <div class="card-center-container">
+                    <div class="w-[70%] bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl p-4 md:p-6 hover-scale max-h-[90%] overflow-y-auto card-content text-sm md:text-base">
+                        <h3 class="text-lg md:text-xl font-bold text-neutral mb-3 flex items-center gap-2 scene-title">
+                            <i class="fa fa-briefcase text-primary"></i> 
+                            Morning Office (Anchors: Desk → File Cabinet → Coffee Machine)
+                        </h3>
+                        <div class="text-gray-700 leading-relaxed mb-3">
+                            Pushing open the glass door, morning light slants across the <span class="word-highlight">polished<span class="tooltip">polished: adj. 抛光的，精致的（补充词）</span></span> wooden <span class="word-highlight">desk<span class="tooltip">desk: n. 办公桌（补充词）</span></span>. You sit down and first <span class="word-highlight">identify<span class="tooltip">identify: v. 识别，确定</span></span> the scattered project documents on the table, using a red pen to <span class="word-highlight">determine<span class="tooltip">determine: v. 确定，决定</span></span> priorities — this is the new project you're in charge of, and you must not let the <span class="word-highlight">pressure<span class="tooltip">pressure: n. 压力</span></span> in your shoulders and neck turn into <span class="word-highlight">stress<span class="tooltip">stress: n. 压力</span></span> as the deadline approaches while typing on the keyboard.<br><br>
+                            
+                            Turning to the rotating <span class="word-highlight">file cabinet<span class="tooltip">file cabinet: n. 文件柜（补充词）</span></span>, your fingertips glide across the cold metal cabinet door to <span class="word-highlight">access<span class="tooltip">access: v. 获取；n. 通道</span></span> the core data inside. You quickly <span class="word-highlight">track<span class="tooltip">track: n. 轨迹；v. 跟踪；keep track of: 跟踪，了解</span></span> last month's performance curve and <span class="word-highlight">keep track of<span class="tooltip">keep track of: 跟踪，了解</span></span> the flow of every <span class="word-highlight">account<span class="tooltip">account: n. 账目，账户</span></span>. Even if there are <span class="word-highlight">negative<span class="tooltip">negative: adj. 负面的</span></span> fluctuations in the data, you can calmly <span class="word-highlight">contain<span class="tooltip">contain: v. 遏制，包含</span></span> risks. Despite the difficulties, you never show <span class="word-highlight">negative<span class="tooltip">negative: adj. 负面的</span></span> emotions and always maintain a <span class="word-highlight">positive<span class="tooltip">positive: adj. 积极的，正面的</span></span> attitude.<br><br>
+                            
+                            Walking to the window-side <span class="word-highlight">coffee machine<span class="tooltip">coffee machine: n. 咖啡机（补充词）</span></span>, you pour a hot latte and <span class="word-highlight">reflect<span class="tooltip">reflect: v. 反思，反映</span></span> in the steam: to <span class="word-highlight">expand<span class="tooltip">expand: v. 扩大，拓展</span></span> business <span class="word-highlight">scale<span class="tooltip">scale: n. 规模；v. 攀登</span></span>, you must first <span class="word-highlight">enhance<span class="tooltip">enhance: v. 提升，增强</span></span> team <span class="word-highlight">performance<span class="tooltip">performance: n. 表现，业绩</span></span>. You <span class="word-highlight">adopt<span class="tooltip">adopt: v. 采用，采纳</span></span> new working methods, <span class="word-highlight">conduct<span class="tooltip">conduct: v. 开展，实施</span></span> efficient meetings, <span class="word-highlight">combat<span class="tooltip">combat: v. 对抗，应对</span></span> inefficient internal friction, and replace useless busyness with <span class="word-highlight">effective<span class="tooltip">effective: adj. 有效的</span></span> strategies — this is the choice of a <span class="word-highlight">professional<span class="tooltip">professional: adj. 专业的；n. 专业人士</span></span> workplace person.<br><br>
+                            
+                            You <span class="word-highlight">figure out<span class="tooltip">figure out: 弄明白，找出</span></span> the optimization space for cost <span class="word-highlight">expense<span class="tooltip">expense: n. 开支，费用</span></span> and <span class="word-highlight">ensure<span class="tooltip">ensure: v. 确保，保证</span></span> that every <span class="word-highlight">fund<span class="tooltip">fund: n. 资金；v. 资助</span></span> is used in <span class="word-highlight">critical<span class="tooltip">critical: adj. 关键的，批评的</span></span> links. You <span class="word-highlight">identify<span class="tooltip">identify: v. 识别，确定</span></span> the <span class="word-highlight">source<span class="tooltip">source: n. 源头，来源</span></span> of problems, shift your work focus, and seize every opportunity with wise <span class="word-highlight">management<span class="tooltip">management: n. 管理，管理层</span></span> under the <span class="word-highlight">current<span class="tooltip">current: adj. 当前的；n. 水流</span></span> market <span class="word-highlight">trend<span class="tooltip">trend: n. 趋势，潮流</span></span> to <span class="word-highlight">seek<span class="tooltip">seek: v. 寻找，寻求</span></span> solutions that satisfy <span class="word-highlight">consumers<span class="tooltip">consumer: n. 消费者</span></span>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 2: 午后城市广场（锚点：喷泉→长椅→花店） 中文 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="2" data-title="午后城市广场" data-desc="社会生活与趋势（50词）" data-lang="zh">
+                <img src="https://picsum.photos/id/1039/1920/1080" alt="午后城市广场场景" class="scene-bg">
+                <div class="card-center-container">
+                    <div class="w-[70%] bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl p-4 md:p-6 hover-scale max-h-[90%] overflow-y-auto card-content text-sm md:text-base">
+                        <h3 class="text-lg md:text-xl font-bold text-neutral mb-3 flex items-center gap-2 scene-title">
+                            <i class="fa fa-users text-primary"></i> 
+                            午后城市广场（锚点：喷泉→长椅→花店）
+                        </h3>
+                        <div class="text-gray-700 leading-relaxed mb-3">
+                            午后的阳光穿过梧桐叶，落在广场中央的<span class="word-highlight">fountain<span class="tooltip">fountain: n. 喷泉（补充词）</span></span>上，水珠溅起时，你看见两位老人<span class="word-highlight">negotiate<span class="tooltip">negotiate: v. 协商，谈判</span></span>下棋的规则，声音温和，没有一丝<span class="word-highlight">violence<span class="tooltip">violence: n. 暴力</span></span>。有人不慎碰倒水杯，水<span class="word-highlight">drown<span class="tooltip">drown: v. 淹没，沉溺于</span></span>漫过棋盘边缘，却只是笑着<span class="word-highlight">patch<span class="tooltip">patch: v. 修补；n. 补丁，小块</span></span>修补好残局——这份<span class="word-highlight">mature<span class="tooltip">mature: adj. 成熟的；v. 成熟</span></span>包容，是岁月<span class="word-highlight">owe<span class="tooltip">owe: v. 欠，归功于</span></span>赋予他们的礼物。<br><br>
+                            
+                            走到石质<span class="word-highlight">bench<span class="tooltip">bench: n. 长椅（补充词）</span></span>旁坐下，你<span class="word-highlight">park<span class="tooltip">park: v. 停车；n. 公园</span></span>把背包放在一旁，翻出<span class="word-highlight">passport<span class="tooltip">passport: n. 护照</span></span>和旅行计划，心里有清晰的<span class="word-highlight">vision<span class="tooltip">vision: n. 愿景，视力</span></span>愿景。你<span class="word-highlight">alert<span class="tooltip">alert: adj. 警惕的；v. 提醒</span></span>警惕地留意着周围，<span class="word-highlight">cautious<span class="tooltip">cautious: adj. 谨慎的，小心的</span></span>谨慎不泄露个人信息，也<span class="word-highlight">respect<span class="tooltip">respect: v/n. 尊重（补充词）</span></span>尊重路过的<span class="word-highlight">religious<span class="tooltip">religious: adj. 宗教的</span></span>信徒，不因<span class="word-highlight">gender<span class="tooltip">gender: n. 性别</span></span>、种族区别对待任何<span class="word-highlight">individual<span class="tooltip">individual: adj. 个人的；n. 个人</span></span>。<br><br>
+                            
+                            走到街角<span class="word-highlight">flower shop<span class="tooltip">flower shop: n. 花店（补充词）</span></span>，老板<span class="word-highlight">pop out<span class="tooltip">pop out: v. 快速拿出，顺路去</span></span>一束向日葵，说这是给常客的<span class="word-highlight">bonus<span class="tooltip">bonus: n. 奖金，额外好处</span></span>小福利。你<span class="word-highlight">deserve<span class="tooltip">deserve: v. 值得，应得</span></span>这份温暖，也明白生活需要<span class="word-highlight">meaningful<span class="tooltip">meaningful: adj. 有意义的</span></span>有意义的小确幸。你<span class="word-highlight">make reference to<span class="tooltip">make reference to: 参考</span></span>旅行攻略，<span class="word-highlight">pursue<span class="tooltip">pursue: v. 追求，致力于</span></span>内心的热爱，即便成功的概率<span class="word-highlight">slim<span class="tooltip">slim: adj. 苗条的，渺茫的</span></span>渺茫，也<span class="word-highlight">willing<span class="tooltip">willing: adj. 愿意的，乐意的</span></span>愿意去尝试——这才是<span class="word-highlight">meaningful<span class="tooltip">meaningful: adj. 有意义的</span></span>有意义的人生。
+                        </div>
+                        <div class="text-gray-600 text-xs md:text-sm border-t border-gray-200 pt-2">
+                            <p>午后的阳光穿过梧桐叶，落在广场中央的喷泉上，水珠溅起时，你看见两位老人协商下棋的规则，声音温和，没有一丝暴力。有人不慎碰倒水杯，水漫过棋盘边缘，却只是笑着修补好残局——这份成熟的包容，是岁月赋予他们的礼物。<br><br>
+                            走到石质长椅旁坐下，你把背包放在一旁，翻出护照和旅行计划，心里有清晰的愿景。你警惕地留意着周围，谨慎不泄露个人信息，也尊重路过的宗教信徒，不因性别、种族区别对待任何个体。<br><br>
+                            走到街角花店，老板拿出一束向日葵，说这是给常客的小福利。你值得这份温暖，也明白生活需要有意义的小确幸。你参考旅行攻略，追求内心的热爱，即便成功的概率渺茫，也愿意去尝试——这才是有意义的人生。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 2 英文版本 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="2" data-title="Afternoon City Square" data-desc="Social Life & Trends (50 words)" data-lang="en">
+                <img src="https://picsum.photos/id/1039/1920/1080" alt="Afternoon City Square Scene" class="scene-bg">
+                <div class="card-center-container">
+                    <div class="w-[70%] bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl p-4 md:p-6 hover-scale max-h-[90%] overflow-y-auto card-content text-sm md:text-base">
+                        <h3 class="text-lg md:text-xl font-bold text-neutral mb-3 flex items-center gap-2 scene-title">
+                            <i class="fa fa-users text-primary"></i> 
+                            Afternoon City Square (Anchors: Fountain → Bench → Flower Shop)
+                        </h3>
+                        <div class="text-gray-700 leading-relaxed mb-3">
+                            Afternoon sunlight filters through sycamore leaves and falls on the central <span class="word-highlight">fountain<span class="tooltip">fountain: n. 喷泉（补充词）</span></span> of the square. As water droplets splash up, you see two elderly men <span class="word-highlight">negotiate<span class="tooltip">negotiate: v. 协商，谈判</span></span> the rules of chess in gentle voices without a trace of <span class="word-highlight">violence<span class="tooltip">violence: n. 暴力</span></span>. Someone accidentally knocks over a water cup, and water <span class="word-highlight">drown<span class="tooltip">drown: v. 淹没，沉溺于</span></span> over the edge of the chessboard, yet they just smile and <span class="word-highlight">patch<span class="tooltip">patch: v. 修补；n. 补丁，小块</span></span> up the game — this <span class="word-highlight">mature<span class="tooltip">mature: adj. 成熟的；v. 成熟</span></span> tolerance is a gift <span class="word-highlight">owe<span class="tooltip">owe: v. 欠，归功于</span></span> to them by the years.<br><br>
+                            
+                            Sitting down beside the stone <span class="word-highlight">bench<span class="tooltip">bench: n. 长椅（补充词）</span></span>, you <span class="word-highlight">park<span class="tooltip">park: v. 停车；n. 公园</span></span> your backpack aside, take out your <span class="word-highlight">passport<span class="tooltip">passport: n. 护照</span></span> and travel plans, with a clear <span class="word-highlight">vision<span class="tooltip">vision: n. 愿景，视力</span></span> in your heart. You <span class="word-highlight">alert<span class="tooltip">alert: adj. 警惕的；v. 提醒</span></span> keep a watchful eye on your surroundings, being <span class="word-highlight">cautious<span class="tooltip">cautious: adj. 谨慎的，小心的</span></span> not to disclose personal information, and also <span class="word-highlight">respect<span class="tooltip">respect: v/n. 尊重（补充词）</span></span> passing <span class="word-highlight">religious<span class="tooltip">religious: adj. 宗教的</span></span> believers, not treating any <span class="word-highlight">individual<span class="tooltip">individual: adj. 个人的；n. 个人</span></span> differently because of <span class="word-highlight">gender<span class="tooltip">gender: n. 性别</span></span> or race.<br><br>
+                            
+                            Walking to the corner <span class="word-highlight">flower shop<span class="tooltip">flower shop: n. 花店（补充词）</span></span>, the boss <span class="word-highlight">pop out<span class="tooltip">pop out: v. 快速拿出，顺路去</span></span> a bunch of sunflowers, saying it's a little <span class="word-highlight">bonus<span class="tooltip">bonus: n. 奖金，额外好处</span></span> for regular customers. You <span class="word-highlight">deserve<span class="tooltip">deserve: v. 值得，应得</span></span> this warmth and understand that life needs <span class="word-highlight">meaningful<span class="tooltip">meaningful: adj. 有意义的</span></span> little joys. You <span class="word-highlight">make reference to<span class="tooltip">make reference to: 参考</span></span> travel guides, <span class="word-highlight">pursue<span class="tooltip">pursue: v. 追求，致力于</span></span> your inner passion, and are <span class="word-highlight">willing<span class="tooltip">willing: adj. 愿意的，乐意的</span></span> to try even if the probability of success is <span class="word-highlight">slim<span class="tooltip">slim: adj. 苗条的，渺茫的</span></span> — this is a <span class="word-highlight">meaningful<span class="tooltip">meaningful: adj. 有意义的</span></span> life.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 3: 暖光客厅（锚点：沙发→书桌→阳台） 中文 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="3" data-title="暖光客厅" data-desc="综合场景补全（23词）" data-lang="zh">
+                <img src="https://picsum.photos/id/1048/1920/1080" alt="暖光客厅场景" class="scene-bg">
+                <div class="card-center-container">
+                    <div class="w-[70%] bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl p-4 md:p-6 hover-scale max-h-[90%] overflow-y-auto card-content text-sm md:text-base">
+                        <h3 class="text-lg md:text-xl font-bold text-neutral mb-3 flex items-center gap-2 scene-title">
+                            <i class="fa fa-home text-primary"></i> 
+                            暖光客厅（锚点：沙发→书桌→阳台）
+                        </h3>
+                        <div class="text-gray-700 leading-relaxed mb-3">
+                            傍晚回到家，你窝进柔软的<span class="word-highlight">sofa<span class="tooltip">sofa: n. 沙发（补充词）</span></span>里，从茶几上拿出坚果，想要让紧绷的神经放松——拒绝<span class="word-highlight">tight<span class="tooltip">tight: adj. 紧绷的，紧密的</span></span>紧绷的<span class="word-highlight">tension<span class="tooltip">tension: n. 紧张，压力</span></span>焦虑，守护内心的<span class="word-highlight">spirit<span class="tooltip">spirit: n. 精神，心灵</span></span>。一缕<span class="word-highlight">ray<span class="tooltip">ray: n. 光线，一缕</span></span>夕阳透过窗帘，大多落在地毯上，温柔得让你想起要保持<span class="word-highlight">modest<span class="tooltip">modest: adj. 谦逊的，适度的</span></span>与<span class="word-highlight">cautious<span class="tooltip">cautious: adj. 谨慎的，小心的</span></span>，不<span class="word-highlight">skip<span class="tooltip">skip: v. 跳过，略过</span></span>跳过生活的小美好。<br><br>
+                            
+                            走到原木<span class="word-highlight">desk<span class="tooltip">desk: n. 书桌（补充词）</span></span>前，你翻开日记本，<span class="word-highlight">introduction<span class="tooltip">introduction: n. 介绍，引言</span></span>引言页写着“用心生活”。你<span class="word-highlight">practically<span class="tooltip">practically: adv. 实际上，几乎</span></span>实际记录着当天的小事：和朋友<span class="word-highlight">cooperate<span class="tooltip">cooperate: v. 合作，协作</span></span>合作完成的小事，<span class="word-highlight">reasonable<span class="tooltip">reasonable: adj. 合理的，通情达理的</span></span>合理的消费，还有<span class="word-highlight">journalist<span class="tooltip">journalist: n. 记者，新闻工作者</span></span>记者朋友分享的采访<span class="word-highlight">process<span class="tooltip">process: n. 过程，进程</span></span>。你明白，生活从不是<span class="word-highlight">swing<span class="tooltip">swing: v/n. 摇摆，摆动</span></span>摇摆的钟摆，而是踏实的每一步。<br><br>
+                            
+                            站在<span class="word-highlight">balcony<span class="tooltip">balcony: n. 阳台（补充词）</span></span>上，晚风拂过，你想起上午在<span class="word-highlight">clinic<span class="tooltip">clinic: n. 诊所，医务室</span></span>的经历：医生<span class="word-highlight">diagnosis<span class="tooltip">diagnosis: n. 诊断</span></span>诊断后，<span class="word-highlight">wipe<span class="tooltip">wipe: v. 擦拭，擦去</span></span>擦掉桌上的药水痕迹，<span class="word-highlight">brake<span class="tooltip">brake: v/n. 刹车，遏制</span></span>遏制了焦虑的蔓延。他说要关注身体<span class="word-highlight">condition<span class="tooltip">condition: n. 状况，条件</span></span>状况，重视每个健康<span class="word-highlight">issue<span class="tooltip">issue: n. 问题，议题；v. 发行</span></span>问题，多<span class="word-highlight">concern<span class="tooltip">concern: v/n. 关心，担忧；concern about: 关心</span></span>关心自己——这才是<span class="word-highlight">precise<span class="tooltip">precise: adj. 精确的，准确的</span></span>精准的生活态度。
+                        </div>
+                        <div class="text-gray-600 text-xs md:text-sm border-t border-gray-200 pt-2">
+                            <p>傍晚回到家，你窝进柔软的沙发里，从茶几上拿出坚果，想要让紧绷的神经放松——拒绝紧绷的焦虑，守护内心的精神平和。一缕夕阳透过窗帘，大多落在地毯上，温柔得让你想起要保持谦逊与谨慎，不跳过生活的小美好。<br><br>
+                            走到原木书桌前，你翻开日记本，引言页写着“用心生活”。你实际记录着当天的小事：和朋友合作完成的小事，合理的消费，还有记者朋友分享的采访过程。你明白，生活从不是摇摆的钟摆，而是踏实的每一步。<br><br>
+                            站在阳台上，晚风拂过，你想起上午在诊所的经历：医生诊断后，擦掉桌上的药水痕迹，遏制了焦虑的蔓延。他说要关注身体状况，重视每个健康问题，多关心自己——这才是精准的生活态度。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 3 英文版本 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="3" data-title="Warm Light Living Room" data-desc="Comprehensive Scene Completion (23 words)" data-lang="en">
+                <img src="https://picsum.photos/id/1048/1920/1080" alt="Warm Light Living Room Scene" class="scene-bg">
+                <div class="card-center-container">
+                    <div class="w-[70%] bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl p-4 md:p-6 hover-scale max-h-[90%] overflow-y-auto card-content text-sm md:text-base">
+                        <h3 class="text-lg md:text-xl font-bold text-neutral mb-3 flex items-center gap-2 scene-title">
+                            <i class="fa fa-home text-primary"></i> 
+                            Warm Light Living Room (Anchors: Sofa → Desk → Balcony)
+                        </h3>
+                        <div class="text-gray-700 leading-relaxed mb-3">
+                            Returning home in the evening, you snuggle into the soft <span class="word-highlight">sofa<span class="tooltip">sofa: n. 沙发（补充词）</span></span> and take out nuts from the coffee table, wanting to relax your <span class="word-highlight">tight<span class="tooltip">tight: adj. 紧绷的，紧密的</span></span> nerves — rejecting <span class="word-highlight">tension<span class="tooltip">tension: n. 紧张，压力</span></span> and guarding your inner <span class="word-highlight">spirit<span class="tooltip">spirit: n. 精神，心灵</span></span>. A <span class="word-highlight">ray<span class="tooltip">ray: n. 光线，一缕</span></span> of sunset shines through the curtains, mostly falling on the carpet, gentle enough to remind you to stay <span class="word-highlight">modest<span class="tooltip">modest: adj. 谦逊的，适度的</span></span> and <span class="word-highlight">cautious<span class="tooltip">cautious: adj. 谨慎的，小心的</span></span>, not to <span class="word-highlight">skip<span class="tooltip">skip: v. 跳过，略过</span></span> the little joys in life.<br><br>
+                            
+                            Walking to the wooden <span class="word-highlight">desk<span class="tooltip">desk: n. 书桌（补充词）</span></span>, you open your diary, where the <span class="word-highlight">introduction<span class="tooltip">introduction: n. 介绍，引言</span></span> page reads "Live with intention". You <span class="word-highlight">practically<span class="tooltip">practically: adv. 实际上，几乎</span></span> record the small things of the day: small tasks <span class="word-highlight">cooperate<span class="tooltip">cooperate: v. 合作，协作</span></span> completed with friends, <span class="word-highlight">reasonable<span class="tooltip">reasonable: adj. 合理的，通情达理的</span></span> consumption, and the interview <span class="word-highlight">process<span class="tooltip">process: n. 过程，进程</span></span> shared by your <span class="word-highlight">journalist<span class="tooltip">journalist: n. 记者，新闻工作者</span></span> friend. You understand that life is never a <span class="word-highlight">swing<span class="tooltip">swing: v/n. 摇摆，摆动</span></span> pendulum, but every steady step.<br><br>
+                            
+                            Standing on the <span class="word-highlight">balcony<span class="tooltip">balcony: n. 阳台（补充词）</span></span>, the evening breeze blows, and you recall your morning experience at the <span class="word-highlight">clinic<span class="tooltip">clinic: n. 诊所，医务室</span></span>: after the doctor's <span class="word-highlight">diagnosis<span class="tooltip">diagnosis: n. 诊断</span></span>, he <span class="word-highlight">wipe<span class="tooltip">wipe: v. 擦拭，擦去</span></span> the medicine stains on the table, <span class="word-highlight">brake<span class="tooltip">brake: v/n. 刹车，遏制</span></span> the spread of anxiety. He said to pay attention to your physical <span class="word-highlight">condition<span class="tooltip">condition: n. 状况，条件</span></span>, take every health <span class="word-highlight">issue<span class="tooltip">issue: n. 问题，议题；v. 发行</span></span> seriously, and <span class="word-highlight">concern<span class="tooltip">concern: v/n. 关心，担忧；concern about: 关心</span></span> more about yourself — this is a <span class="word-highlight">precise<span class="tooltip">precise: adj. 精确的，准确的</span></span> attitude towards life.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 4: 记忆完成 中文 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="4" data-title="记忆完成" data-desc="149词全量覆盖" data-lang="zh">
+                <img src="https://picsum.photos/id/1000/1920/1080" alt="记忆完成场景" class="scene-bg">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-white/80 p-6 rounded-xl shadow-2xl text-center card-content w-[60%] text-sm md:text-base">
+                        <i class="fa fa-check-circle text-5xl text-primary mb-3"></i>
+                        <h3 class="text-xl md:text-2xl font-bold text-neutral mb-2 scene-title">
+                            149个单词已全量覆盖
+                        </h3>
+                        <p class="text-gray-600 mb-3">
+                            你已走过「晨光办公室→午后城市广场→暖光客厅」三个记忆宫殿场景<br>每个场景都有清晰的空间锚点，单词自然融入画面与动作
+                        </p>
+                        <div class="flex justify-center gap-4 text-left text-xs md:text-sm text-gray-700 flex-wrap">
+                            <div>
+                                <h4 class="font-bold text-primary mb-1">📌 办公室锚点</h4>
+                                <p>办公桌→文件柜→咖啡机</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-primary mb-1">📌 广场锚点</h4>
+                                <p>喷泉→长椅→花店</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-primary mb-1">📌 客厅锚点</h4>
+                                <p>沙发→书桌→阳台</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 4 英文版本 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="4" data-title="Memory Completion" data-desc="149 Words Fully Covered" data-lang="en">
+                <img src="https://picsum.photos/id/1000/1920/1080" alt="Memory Completion Scene" class="scene-bg">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-white/80 p-6 rounded-xl shadow-2xl text-center card-content w-[60%] text-sm md:text-base">
+                        <i class="fa fa-check-circle text-5xl text-primary mb-3"></i>
+                        <h3 class="text-xl md:text-2xl font-bold text-neutral mb-2 scene-title">
+                            149 Words Fully Covered
+                        </h3>
+                        <p class="text-gray-600 mb-3">
+                            You have walked through three memory palace scenes: Morning Office → Afternoon City Square → Warm Light Living Room<br>Each scene has clear spatial anchors, and words are naturally integrated into images and actions
+                        </p>
+                        <div class="flex justify-center gap-4 text-left text-xs md:text-sm text-gray-700 flex-wrap">
+                            <div>
+                                <h4 class="font-bold text-primary mb-1">📌 Office Anchors</h4>
+                                <p>Desk → File Cabinet → Coffee Machine</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-primary mb-1">📌 Square Anchors</h4>
+                                <p>Fountain → Bench → Flower Shop</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-primary mb-1">📌 Living Room Anchors</h4>
+                                <p>Sofa → Desk → Balcony</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scene 5: 马年祝福 中文 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="5" data-title="马年祝福" data-desc="记忆宫殿助你马到成功" data-lang="zh">
+                <img src="https://picsum.photos/id/1011/1920/1080" alt="马年祝福场景" class="scene-bg">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-white/80 p-6 rounded-xl shadow-2xl text-center card-content w-[60%] text-sm md:text-base">
+                        <i class="fa fa-horse text-5xl text-primary mb-3"></i>
+                        <h3 class="text-xl md:text-2xl font-bold text-neutral mb-2 scene-title">
+                            2026丙午马年 学习顺利
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            记忆宫殿+场景画面+动作串联<br>让单词不再孤立，让记忆更有温度
+                        </p>
+                        <div class="bg-primary/10 rounded-lg p-3 inline-block">
+                            <p class="text-primary font-medium">
+                                🐴 马到成功 · 词到功成 🐴
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 5 英文版本 -->
+            <div class="scene absolute w-full h-full scene-transition opacity-0 translate-x-full" data-scene="5" data-title="Year of the Horse Blessings" data-desc="Memory Palace Helps You Succeed Immediately" data-lang="en">
+                <img src="https://picsum.photos/id/1011/1920/1080" alt="Year of the Horse Blessings Scene" class="scene-bg">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-white/80 p-6 rounded-xl shadow-2xl text-center card-content w-[60%] text-sm md:text-base">
+                        <i class="fa fa-horse text-5xl text-primary mb-3"></i>
+                        <h3 class="text-xl md:text-2xl font-bold text-neutral mb-2 scene-title">
+                            2026 Year of the Horse - Smooth Learning
+                        </h3>
+                        <p class="text-gray-600 mb-4">
+                            Memory Palace + Scene Images + Action Linking<br>Make words no longer isolated, make memory more warm
+                        </p>
+                        <div class="bg-primary/10 rounded-lg p-3 inline-block">
+                            <p class="text-primary font-medium">
+                                🐴 Success at First Try · Master Words with Ease 🐴
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 语言切换按钮 -->
+    <button id="lang-toggle-btn" class="fixed-lang-btn">
+        <i class="fa fa-language text-xl"></i>
+    </button>
+
+    <!-- Footer - 隐藏（全屏布局下不需要） -->
+    <footer class="hidden bg-neutral text-white py-4">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>
+                2026 丙午马年 | 记忆宫殿单词记忆系统 | 空间锚点·动作串联·五感记忆
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const scenes = document.querySelectorAll('.scene');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const audioBtn = document.getElementById('audio-btn');
+            const sceneIndicator = document.getElementById('scene-indicator');
+            const langToggleBtn = document.getElementById('lang-toggle-btn');
+            let currentScene = 1;
+            let currentLang = 'zh'; // 默认中文
+            const totalScenes = 5; // 总场景数
+
+            // 切换语言
+            function toggleLanguage() {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateScene();
+                
+                // 更改语言按钮提示
+                const langIcon = langToggleBtn.querySelector('i');
+                if (currentLang === 'en') {
+                    langIcon.classList.remove('fa-language');
+                    langIcon.classList.add('fa-globe');
+                } else {
+                    langIcon.classList.remove('fa-globe');
+                    langIcon.classList.add('fa-language');
+                }
+            }
+
+            // Update scene display
+            function updateScene() {
+                scenes.forEach(scene => {
+                    const sceneNum = parseInt(scene.dataset.scene);
+                    const sceneLang = scene.dataset.lang;
+                    
+                    // 只显示当前场景+当前语言的内容
+                    if (sceneNum === currentScene && sceneLang === currentLang) {
+                        scene.classList.remove('opacity-0', 'translate-x-full', '-translate-x-full');
+                        scene.classList.add('opacity-100', 'translate-x-0');
+                    } else {
+                        scene.classList.remove('opacity-100', 'translate-x-0');
+                        scene.classList.add('opacity-0', sceneNum < currentScene ? '-translate-x-full' : 'translate-x-full');
+                    }
+                });
+
+                // Update indicator
+                const currentSceneEl = document.querySelector(`.scene[data-scene="${currentScene}"][data-lang="${currentLang}"]`);
+                const sceneTitle = currentSceneEl.dataset.title;
+                sceneIndicator.textContent = `场景 ${currentScene}/${totalScenes}：${sceneTitle}`;
+
+                // Enable/disable buttons
+                prevBtn.disabled = currentScene === 1;
+                nextBtn.disabled = currentScene === totalScenes;
+                prevBtn.classList.toggle('opacity-50', currentScene === 1);
+                prevBtn.classList.toggle('cursor-not-allowed', currentScene === 1);
+                nextBtn.classList.toggle('opacity-50', currentScene === totalScenes);
+                nextBtn.classList.toggle('cursor-not-allowed', currentScene === totalScenes);
+            }
+
+            // Button click handlers
+            prevBtn.addEventListener('click', () => {
+                if (currentScene > 1) {
+                    currentScene--;
+                    updateScene();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentScene < totalScenes) {
+                    currentScene++;
+                    updateScene();
+                }
+            });
+
+            // 语言切换按钮事件
+            langToggleBtn.addEventListener('click', toggleLanguage);
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextBtn.click();
+                } else if (e.key === 'ArrowLeft') {
+                    prevBtn.click();
+                } else if (e.key === 'l' && e.ctrlKey) { // Ctrl+L 快速切换语言
+                    toggleLanguage();
+                }
+            });
+
+            // 语音朗读功能
+            audioBtn.addEventListener('click', () => {
+                const currentSceneEl = document.querySelector(`.scene[data-scene="${currentScene}"][data-lang="${currentLang}"]`);
+                let textToRead = currentSceneEl.querySelector('.card-content .text-gray-700')?.textContent || 
+                                currentSceneEl.querySelector('.card-content p')?.textContent;
+                
+                // 过滤掉tooltip里的内容
+                textToRead = textToRead.replace(/[a-zA-Z]+:\s.*?（[^）]*）/g, '');
+                
+                // Check if browser supports TTS
+                if ('speechSynthesis' in window && textToRead) {
+                    const utterance = new SpeechSynthesisUtterance(textToRead);
+                    utterance.lang = currentLang === 'zh' ? 'zh-CN' : 'en-US';
+                    utterance.rate = 0.85; // Slightly slower for better comprehension
+                    window.speechSynthesis.speak(utterance);
+                    
+                    // Change icon during speech
+                    const icon = audioBtn.querySelector('i');
+                    icon.classList.remove('fa-volume-up');
+                    icon.classList.add('fa-volume-off');
+                    
+                    utterance.onend = () => {
+                        icon.classList.remove('fa-volume-off');
+                        icon.classList.add('fa-volume-up');
+                    };
+                } else if(!textToRead) {
+                    const alertMsg = currentLang === 'zh' 
+                        ? '当前场景为总结页，可返回前序场景体验语音朗读～'
+                        : 'This is a summary page, return to previous scenes to experience text-to-speech～';
+                    alert(alertMsg);
+                } else {
+                    const alertMsg = currentLang === 'zh'
+                        ? '您的浏览器不支持语音朗读功能，请使用现代浏览器（如Chrome/Edge）。'
+                        : 'Your browser does not support text-to-speech, please use modern browsers (e.g. Chrome/Edge).';
+                    alert(alertMsg);
+                }
+            });
+
+            // Initial setup
+            updateScene();
+        });
+    </script>
+</body>
+</html>

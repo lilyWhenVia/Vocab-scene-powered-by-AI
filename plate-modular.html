@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记忆宫殿单词记忆系统（模块化版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 模块1: Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E53E3E',
+                        secondary: '#ED8936',
+                        accent: '#4299E1',
+                        neutral: '#2D3748',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Poppins', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 模块2: 自定义样式 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            /* 场景过渡动画 */
+            .scene-transition {
+                transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+            }
+            
+            /* 卡片悬浮效果 */
+            .hover-scale {
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.05);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            
+            /* 单词高亮与提示 */
+            .word-highlight {
+                @apply relative cursor-help font-semibold text-primary hover:bg-primary/10 px-1 rounded inline-block;
+            }
+            .tooltip {
+                @apply absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-md bg-neutral text-white text-xs rounded p-2 shadow-lg z-50 hidden;
+            }
+            .word-highlight:hover .tooltip { display: block; }
+            
+            /* 布局工具类 */
+            .card-center-container {
+                @apply absolute inset-0 flex items-center justify-center p-4;
+            }
+            .fixed-lang-btn {
+                @apply fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center z-50 transition-all hover:bg-primary/90 hover:scale-110;
+            }
+            .scene-bg {
+                @apply absolute inset-0 w-full h-full object-cover z-0;
+            }
+            
+            /* 装饰动画 */
+            .animate-float {
+                animation: float 6s ease-in-out infinite;
+            }
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-15px); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col m-0 p-0 overflow-hidden">
+    <!-- 模块3: 顶部导航栏 -->
+    <header class="bg-gradient-to-r from-primary to-secondary text-white shadow-md sticky top-0 z-40 w-full">
+        <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center gap-2 mb-2 md:mb-0">
+                <i class="fa fa-horse text-2xl"></i>
+                <h1 id="app-title" class="text-xl md:text-2xl font-bold">记忆宫殿 | 单词记忆</h1>
+            </div>
+            <div class="flex items-center gap-3 mb-2 md:mb-0">
+                <button id="prev-btn" class="flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition text-sm">
+                    <i class="fa fa-arrow-left"></i> <span data-i18n="prev">上一场景</span>
+                </button>
+                <button id="next-btn" class="flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg transition text-sm">
+                    <span data-i18n="next">下一场景</span> <i class="fa fa-arrow-right"></i>
+                </button>
+                <span id="scene-indicator" class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium"></span>
+                <button id="audio-btn" class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition" title="朗读当前场景">
+                    <i class="fa fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 模块4: 主内容区 -->
+    <main class="flex-grow w-full h-[calc(100vh-64px)] overflow-hidden p-0 m-0">
+        <div id="palace-container" class="relative w-full h-full overflow-hidden"></div>
+    </main>
+
+    <!-- 模块5: 语言切换按钮 -->
+    <button id="lang-toggle-btn" class="fixed-lang-btn" title="切换语言 (Ctrl+L)">
+        <i class="fa fa-language text-xl"></i>
+    </button>
+
+    <!-- 模块6: 场景数据配置 -->
+    <script>
+        // ========== 数据配置模块 ==========
+        const CONFIG = {
+            // 应用配置
+            app: {
+                title: { zh: '记忆宫殿 | 单词记忆', en: 'Memory Palace | Vocabulary' },
+                ttsRate: 0.85,
+            },
+            // 国际化文本
+            i18n: {
+                zh: {
+                    prev: '上一场景',
+                    next: '下一场景',
+                    sceneIndicator: (cur, total, title) => `场景 ${cur}/${total}：${title}`,
+                    noTTS: '您的浏览器不支持语音朗读功能',
+                    noContent: '当前场景无朗读内容',
+                },
+                en: {
+                    prev: 'Previous',
+                    next: 'Next',
+                    sceneIndicator: (cur, total, title) => `Scene ${cur}/${total}: ${title}`,
+                    noTTS: 'Your browser does not support text-to-speech',
+                    noContent: 'No content to read in this scene',
+                }
+            }
+        };
+
+        // 场景数据（可从外部JSON加载）
+        const SCENES_DATA = [
+            {
+                id: 1,
+                icon: 'fa-briefcase',
+                bgImage: 'https://picsum.photos/id/42/1920/1080',
+                zh: {
+                    title: '晨光办公室',
+                    desc: '职场工作与管理',
+                    anchors: '办公桌→文件柜→咖啡机',
+                    content: `推开玻璃门，晨光斜铺在<span class="word-highlight">polished<span class="tooltip">polished: adj. 抛光的，精致的</span></span>木质<span class="word-highlight">desk<span class="tooltip">desk: n. 办公桌</span></span>上，你坐下来，指尖先<span class="word-highlight">identify<span class="tooltip">identify: v. 识别，确定</span></span>识别桌上散落的项目文件，用红笔<span class="word-highlight">determine<span class="tooltip">determine: v. 确定，决定</span></span>优先级。`,
+                    translation: '推开玻璃门，晨光斜铺在光亮的木质办公桌上，你坐下来，先识别桌上散落的项目文件，用红笔确定优先级。'
+                },
+                en: {
+                    title: 'Morning Office',
+                    desc: 'Workplace & Management',
+                    anchors: 'Desk → File Cabinet → Coffee Machine',
+                    content: `Pushing open the glass door, morning light slants across the <span class="word-highlight">polished<span class="tooltip">polished: adj. 抛光的，精致的</span></span> wooden <span class="word-highlight">desk<span class="tooltip">desk: n. 办公桌</span></span>. You sit down and first <span class="word-highlight">identify<span class="tooltip">identify: v. 识别，确定</span></span> the scattered project documents, using a red pen to <span class="word-highlight">determine<span class="tooltip">determine: v. 确定，决定</span></span> priorities.`,
+                    translation: null
+                }
+            },
+            {
+                id: 2,
+                icon: 'fa-users',
+                bgImage: 'https://picsum.photos/id/1039/1920/1080',
+                zh: {
+                    title: '午后城市广场',
+                    desc: '社会生活与趋势',
+                    anchors: '喷泉→长椅→花店',
+                    content: `午后的阳光穿过梧桐叶，落在广场中央的<span class="word-highlight">fountain<span class="tooltip">fountain: n. 喷泉</span></span>上，水珠溅起时，你看见两位老人<span class="word-highlight">negotiate<span class="tooltip">negotiate: v. 协商，谈判</span></span>下棋的规则。`,
+                    translation: '午后的阳光穿过梧桐叶，落在广场中央的喷泉上，水珠溅起时，你看见两位老人协商下棋的规则。'
+                },
+                en: {
+                    title: 'Afternoon City Square',
+                    desc: 'Social Life & Trends',
+                    anchors: 'Fountain → Bench → Flower Shop',
+                    content: `Afternoon sunlight filters through sycamore leaves and falls on the central <span class="word-highlight">fountain<span class="tooltip">fountain: n. 喷泉</span></span> of the square. You see two elderly men <span class="word-highlight">negotiate<span class="tooltip">negotiate: v. 协商，谈判</span></span> the rules of chess.`,
+                    translation: null
+                }
+            },
+            // 完成页
+            {
+                id: 3,
+                icon: 'fa-check-circle',
+                bgImage: 'https://picsum.photos/id/1000/1920/1080',
+                isSpecial: true,
+                zh: {
+                    title: '记忆完成',
+                    desc: '全量覆盖',
+                    specialContent: `
+                        <i class="fa fa-check-circle text-5xl text-primary mb-3"></i>
+                        <h3 class="text-xl md:text-2xl font-bold text-neutral mb-2">单词已全量覆盖</h3>
+                        <p class="text-gray-600 mb-3">你已走过所有记忆宫殿场景<br>每个场景都有清晰的空间锚点</p>
+                    `
+                },
+                en: {
+                    title: 'Memory Complete',
+                    desc: 'Fully Covered',
+                    specialContent: `
+                        <i class="fa fa-check-circle text-5xl text-primary mb-3"></i>
+                        <h3 class="text-xl md:text-2xl font-bold text-neutral mb-2">All Words Covered</h3>
+                        <p class="text-gray-600 mb-3">You have walked through all memory palace scenes<br>Each scene has clear spatial anchors</p>
+                    `
+                }
+            }
+        ];
+    </script>
+
+    <!-- 模块7: 核心逻辑 -->
+    <script>
+        // ========== 状态管理模块 ==========
+        const State = {
+            currentScene: 1,
+            currentLang: 'zh',
+            totalScenes: SCENES_DATA.length,
+            isSpeaking: false
+        };
+
+        // ========== DOM引用模块 ==========
+        const DOM = {
+            container: null,
+            prevBtn: null,
+            nextBtn: null,
+            audioBtn: null,
+            sceneIndicator: null,
+            langToggleBtn: null,
+            appTitle: null,
+            init() {
+                this.container = document.getElementById('palace-container');
+                this.prevBtn = document.getElementById('prev-btn');
+                this.nextBtn = document.getElementById('next-btn');
+                this.audioBtn = document.getElementById('audio-btn');
+                this.sceneIndicator = document.getElementById('scene-indicator');
+                this.langToggleBtn = document.getElementById('lang-toggle-btn');
+                this.appTitle = document.getElementById('app-title');
+            }
+        };
+
+        // ========== 场景渲染模块 ==========
+        const SceneRenderer = {
+            // 生成单个场景HTML
+            createSceneHTML(sceneData, lang) {
+                const data = sceneData[lang];
+                const isActive = sceneData.id === 1 && lang === 'zh';
+                const positionClass = isActive ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full';
+                
+                let cardContent = '';
+                if (sceneData.isSpecial) {
+                    cardContent = `
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="bg-white/80 p-6 rounded-xl shadow-2xl text-center w-[60%]">
+                                ${data.specialContent}
+                            </div>
+                        </div>`;
+                } else {
+                    cardContent = `
+                        <div class="card-center-container">
+                            <div class="w-[70%] bg-white/80 backdrop-blur-sm rounded-xl shadow-2xl p-4 md:p-6 hover-scale max-h-[90%] overflow-y-auto card-content text-sm md:text-base">
+                                <h3 class="text-lg md:text-xl font-bold text-neutral mb-3 flex items-center gap-2">
+                                    <i class="fa ${sceneData.icon} text-primary"></i>
+                                    ${data.title}（${data.anchors}）
+                                </h3>
+                                <div class="text-gray-700 leading-relaxed mb-3">${data.content}</div>
+                                ${data.translation ? `<div class="text-gray-600 text-xs md:text-sm border-t border-gray-200 pt-2"><p>${data.translation}</p></div>` : ''}
+                            </div>
+                        </div>`;
+                }
+
+                return `
+                    <div class="scene absolute w-full h-full scene-transition ${positionClass}" 
+                         data-scene="${sceneData.id}" data-lang="${lang}" data-title="${data.title}">
+                        <img src="${sceneData.bgImage}" alt="${data.title}" class="scene-bg">
+                        ${cardContent}
+                    </div>`;
+            },
+
+            // 渲染所有场景
+            renderAll() {
+                let html = '';
+                SCENES_DATA.forEach(scene => {
+                    html += this.createSceneHTML(scene, 'zh');
+                    html += this.createSceneHTML(scene, 'en');
+                });
+                DOM.container.innerHTML = html;
+            }
+        };
+
+        // ========== 场景控制模块 ==========
+        const SceneController = {
+            update() {
+                const scenes = document.querySelectorAll('.scene');
+                scenes.forEach(scene => {
+                    const sceneNum = parseInt(scene.dataset.scene);
+                    const sceneLang = scene.dataset.lang;
+                    
+                    if (sceneNum === State.currentScene && sceneLang === State.currentLang) {
+                        scene.classList.remove('opacity-0', 'translate-x-full', '-translate-x-full');
+                        scene.classList.add('opacity-100', 'translate-x-0');
+                    } else {
+                        scene.classList.remove('opacity-100', 'translate-x-0');
+                        scene.classList.add('opacity-0', sceneNum < State.currentScene ? '-translate-x-full' : 'translate-x-full');
+                    }
+                });
+                this.updateUI();
+            },
+
+            updateUI() {
+                const i18n = CONFIG.i18n[State.currentLang];
+                const currentSceneEl = document.querySelector(`.scene[data-scene="${State.currentScene}"][data-lang="${State.currentLang}"]`);
+                const sceneTitle = currentSceneEl?.dataset.title || '';
+                
+                // 更新指示器
+                DOM.sceneIndicator.textContent = i18n.sceneIndicator(State.currentScene, State.totalScenes, sceneTitle);
+                
+                // 更新按钮状态
+                DOM.prevBtn.disabled = State.currentScene === 1;
+                DOM.nextBtn.disabled = State.currentScene === State.totalScenes;
+                DOM.prevBtn.classList.toggle('opacity-50', State.currentScene === 1);
+                DOM.prevBtn.classList.toggle('cursor-not-allowed', State.currentScene === 1);
+                DOM.nextBtn.classList.toggle('opacity-50', State.currentScene === State.totalScenes);
+                DOM.nextBtn.classList.toggle('cursor-not-allowed', State.currentScene === State.totalScenes);
+                
+                // 更新按钮文本
+                DOM.prevBtn.querySelector('[data-i18n="prev"]').textContent = i18n.prev;
+                DOM.nextBtn.querySelector('[data-i18n="next"]').textContent = i18n.next;
+                
+                // 更新标题
+                DOM.appTitle.textContent = CONFIG.app.title[State.currentLang];
+            },
+
+            prev() {
+                if (State.currentScene > 1) {
+                    State.currentScene--;
+                    this.update();
+                }
+            },
+
+            next() {
+                if (State.currentScene < State.totalScenes) {
+                    State.currentScene++;
+                    this.update();
+                }
+            }
+        };
+
+        // ========== 语言切换模块 ==========
+        const LanguageController = {
+            toggle() {
+                State.currentLang = State.currentLang === 'zh' ? 'en' : 'zh';
+                SceneController.update();
+                this.updateIcon();
+            },
+
+            updateIcon() {
+                const icon = DOM.langToggleBtn.querySelector('i');
+                if (State.currentLang === 'en') {
+                    icon.classList.replace('fa-language', 'fa-globe');
+                } else {
+                    icon.classList.replace('fa-globe', 'fa-language');
+                }
+            }
+        };
+
+        // ========== 语音朗读模块 ==========
+        const TTSController = {
+            speak() {
+                if (!('speechSynthesis' in window)) {
+                    alert(CONFIG.i18n[State.currentLang].noTTS);
+                    return;
+                }
+
+                // 停止当前朗读
+                if (State.isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    this.resetIcon();
+                    State.isSpeaking = false;
+                    return;
+                }
+
+                const currentSceneEl = document.querySelector(`.scene[data-scene="${State.currentScene}"][data-lang="${State.currentLang}"]`);
+                let textToRead = currentSceneEl?.querySelector('.card-content .text-gray-700')?.textContent ||
+                                 currentSceneEl?.querySelector('.card-content p')?.textContent;
+
+                if (!textToRead) {
+                    alert(CONFIG.i18n[State.currentLang].noContent);
+                    return;
+                }
+
+                // 过滤tooltip内容
+                textToRead = textToRead.replace(/[a-zA-Z]+:\s.*?（[^）]*）/g, '').trim();
+
+                const utterance = new SpeechSynthesisUtterance(textToRead);
+                utterance.lang = State.currentLang === 'zh' ? 'zh-CN' : 'en-US';
+                utterance.rate = CONFIG.app.ttsRate;
+
+                utterance.onstart = () => {
+                    State.isSpeaking = true;
+                    this.setActiveIcon();
+                };
+
+                utterance.onend = () => {
+                    State.isSpeaking = false;
+                    this.resetIcon();
+                };
+
+                utterance.onerror = () => {
+                    State.isSpeaking = false;
+                    this.resetIcon();
+                };
+
+                window.speechSynthesis.speak(utterance);
+            },
+
+            setActiveIcon() {
+                const icon = DOM.audioBtn.querySelector('i');
+                icon.classList.replace('fa-volume-up', 'fa-volume-off');
+            },
+
+            resetIcon() {
+                const icon = DOM.audioBtn.querySelector('i');
+                icon.classList.replace('fa-volume-off', 'fa-volume-up');
+            }
+        };
+
+        // ========== 事件绑定模块 ==========
+        const EventBinder = {
+            init() {
+                // 按钮事件
+                DOM.prevBtn.addEventListener('click', () => SceneController.prev());
+                DOM.nextBtn.addEventListener('click', () => SceneController.next());
+                DOM.audioBtn.addEventListener('click', () => TTSController.speak());
+                DOM.langToggleBtn.addEventListener('click', () => LanguageController.toggle());
+
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight') SceneController.next();
+                    else if (e.key === 'ArrowLeft') SceneController.prev();
+                    else if (e.key === 'l' && e.ctrlKey) {
+                        e.preventDefault();
+                        LanguageController.toggle();
+                    }
+                });
+            }
+        };
+
+        // ========== 应用初始化 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            DOM.init();
+            SceneRenderer.renderAll();
+            SceneController.update();
+            EventBinder.init();
+        });
+    </script>
+</body>
+</html>

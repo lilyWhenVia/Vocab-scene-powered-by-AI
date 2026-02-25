@@ -1,104 +1,94 @@
-# 🏛️ Memory Palace Vocabulary System | 记忆宫殿单词学习系统
+# 🌿 记了么 | AI Memory Palace
 
-[![English](https://img.shields.io/badge/Language-English-blue)](README.md)
-[![中文](https://img.shields.io/badge/语言-中文-red)](README.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **AI-Powered Immersive Vocabulary Learning with Memory Palace Technique**
+> **AI 自动生成沉浸式记忆场景**
 > 
-> 基于记忆宫殿（Method of Loci）原理的沉浸式AI辅助单词记忆系统
+> 上传词库，AI 自动生成记忆宫殿场景，让单词在故事中自然生长
 
-## ✨ Features | 功能特点
+## ✨ 功能特点
 
-- 🎭 **8 Immersive Scenes** - 8个沉浸式场景（图书馆、博物馆、医学中心等）
-- 🔤 **356 Vocabulary Words** - 覆盖356个核心词汇
-- 🌐 **Bilingual Support** - 中英双语切换，一键对照学习
-- 💡 **Hover Tooltips** - 单词悬浮释义，即时查看词义
-- 📖 **Paragraph Translation** - 点击段落展开中英对照翻译
-- 🔊 **Text-to-Speech (TTS)** - 语音朗读，支持中英文发音
-- 📱 **Responsive Design** - 响应式设计，支持桌面端和移动端
-- ⌨️ **Keyboard Navigation** - 键盘快捷键导航（← → 切换场景）
+- 🤖 **AI 场景生成** - 上传单词，AI 自动生成沉浸式记忆场景
+- 📄 **多格式支持** - 支持 PDF、Word、TXT 词库上传
+- 🌐 **中英双语** - 一键切换中英文叙事
+- 💡 **单词高亮** - 悬浮查看词义，自然融入故事
+- 📱 **响应式设计** - 支持桌面端和移动端
+- 💾 **本地缓存** - 历史词库自动保存，随时回顾
 
-## 🧠 Memory Palace Technique | 记忆宫殿原理
+## 🚀 快速开始
 
-Memory Palace (Method of Loci) is an ancient mnemonic technique that leverages spatial memory to enhance learning:
-
-记忆宫殿（位置记忆法）是一种源自古希腊的助记技术：
-
-1. **Spatial Anchors** - 每个场景设置3个空间锚点
-2. **Visual Association** - 将单词与场景位置建立视觉联想
-3. **Story Linking** - 通过连贯故事串联所有单词
-4. **Mental Walk** - 心理漫步回忆，按路径依次复习
-
-## 🚀 Quick Start | 快速开始
+### 后端
 
 ```bash
-# Clone the repository
-git clone https://github.com/lilyWhenVia/Vocab-scene-powered-by-AI.git
+cd memory-palace-mvp/backend
 
-# Open in browser
-# 直接用浏览器打开 memory-palace-356.html
+# 创建虚拟环境
+python -m venv venv
+.\venv\Scripts\activate  # Windows
+source venv/bin/activate  # Mac/Linux
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 启动服务
+uvicorn app.main:app --reload --port 8000
 ```
 
-No installation required! Just open `memory-palace-356.html` in your browser.
+### 前端
 
-无需安装！直接用浏览器打开即可使用。
+```bash
+cd memory-palace-mvp/frontend
 
-## 📸 Screenshots | 截图预览
+# 安装依赖
+npm install
 
-| Scene Navigation | Word Highlight | Translation |
-|-----------------|----------------|-------------|
-| 场景切换 | 单词高亮 | 翻译展开 |
+# 启动开发服务器
+npm run dev
+```
 
-## 🛠️ Tech Stack | 技术栈
+访问 http://localhost:5173 开始使用。
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Styling**: Tailwind CSS
-- **Icons**: Font Awesome 4.7
-- **TTS**: Web Speech API
-- **No Backend Required** - 纯前端实现，无需服务器
+### 配置 AI
 
-## 📚 Documentation | 文档
+访问 http://localhost:5173/admin（密钥：admin123）配置 AI API Key。
 
-| Document | Description |
-|----------|-------------|
-| [PROMPT-记忆宫殿单词系统.md](PROMPT-记忆宫殿单词系统.md) | 完整开发需求文档 |
-| [TECH-技术实现文档.md](TECH-技术实现文档.md) | 技术实现细节 |
-| [WORKFLOW-单词记忆宫殿化.md](WORKFLOW-单词记忆宫殿化.md) | 工作流指南 |
-| [CHANGELOG-功能改造记录.md](CHANGELOG-功能改造记录.md) | 更新记录 |
+支持的 AI 提供商：
+- MiniMax（推荐，性价比最高）
+- 智谱 GLM
+- DeepSeek
+- 通义千问
+- OpenAI
+- Anthropic
 
-## 🎯 Use Cases | 适用场景
+## 📁 项目结构
 
-- 📝 **GRE/TOEFL/IELTS Vocabulary** - 出国考试词汇备考
-- 🎓 **Academic English** - 学术英语词汇学习
-- 💼 **Business English** - 商务英语词汇积累
-- 📖 **Daily Reading** - 日常阅读词汇扩展
+```
+.
+├── memory-palace-mvp/     # 项目代码
+│   ├── backend/           # FastAPI 后端
+│   │   └── app/
+│   │       ├── main.py        # API 路由
+│   │       ├── ai_service.py  # AI 场景生成
+│   │       └── ...
+│   └── frontend/          # React 前端
+│       └── src/
+│           ├── pages/         # 页面组件
+│           └── ...
+├── docs/                  # 文档
+├── templates/             # HTML 模板参考
+└── samples/               # 示例文件
+```
 
-## 🔑 Keywords | 关键词
+## 🛠️ 技术栈
 
-`memory palace` `method of loci` `vocabulary learning` `english learning` `word memorization` `flashcard` `spaced repetition` `language learning` `GRE vocabulary` `TOEFL vocabulary` `IELTS vocabulary` `bilingual learning` `immersive learning` `AI-assisted learning` `mnemonic technique`
+- **后端**: FastAPI, Python
+- **前端**: React, Vite, Tailwind CSS
+- **AI**: MiniMax / 智谱 / DeepSeek / OpenAI / Anthropic
 
-`记忆宫殿` `位置记忆法` `单词记忆` `英语学习` `词汇学习` `背单词` `间隔重复` `语言学习` `考研英语` `四六级` `雅思托福GRE` `双语学习` `沉浸式学习` `AI辅助学习` `助记法`
+## 📄 License
 
-## 🤝 Contributing | 贡献
-
-Contributions are welcome! Feel free to:
-
-欢迎贡献！你可以：
-
-- 🐛 Report bugs | 报告问题
-- 💡 Suggest features | 建议新功能
-- 📝 Improve documentation | 完善文档
-- 🌍 Add translations | 添加翻译
-
-## 📄 License | 许可证
-
-MIT License - feel free to use for personal or commercial projects.
-
-MIT 许可证 - 可自由用于个人或商业项目。
+MIT License
 
 ---
 
-**Made with ❤️ for language learners worldwide**
-
-**为全球语言学习者用心打造**
+**🌿 在场景中记忆，让单词自然生长**

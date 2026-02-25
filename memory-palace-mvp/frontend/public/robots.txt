@@ -1,0 +1,23 @@
+# 记了么 - AI记忆宫殿
+# https://jileme.com
+
+User-agent: *
+Allow: /
+
+# AI 爬虫友好
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://jileme.com/sitemap.xml

@@ -2,10 +2,117 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>词境 - 沉浸式AI单词记忆</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- 基础 SEO -->
+    <title>记了么 - AI记忆宫殿 | 沉浸式单词记忆工具</title>
+    <meta name="description" content="记了么是一款AI驱动的单词记忆工具，通过记忆宫殿技术将单词融入沉浸式场景故事，支持中英双语、50+预设场景、PDF/Word词库导入，让背单词变得有趣高效。" />
+    <meta name="keywords" content="记忆宫殿,单词记忆,AI背单词,英语学习,词汇记忆,memory palace,vocabulary,英语单词,四六级,考研英语,雅思托福" />
+    <meta name="author" content="记了么" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://jileme.com/" />
+    <meta property="og:title" content="记了么 - AI记忆宫殿 | 沉浸式单词记忆" />
+    <meta property="og:description" content="AI自动生成记忆宫殿场景，让单词在故事中自然生长。支持50+场景、中英双语、PDF导入。" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&h=630&fit=crop" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="记了么" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="记了么 - AI记忆宫殿 | 沉浸式单词记忆" />
+    <meta name="twitter:description" content="AI自动生成记忆宫殿场景，让单词在故事中自然生长。" />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&h=630&fit=crop" />
+    
+    <!-- GEO - AI 检索优化 (Generative Engine Optimization) -->
+    <meta name="ai:description" content="记了么是一款基于记忆宫殿技术的AI单词记忆应用。核心功能：1)上传单词列表，AI自动分析主题并选择匹配场景；2)生成沉浸式中英双语故事，单词自然融入情节；3)50个预设场景覆盖学习、商务、自然、科技等主题；4)支持PDF/Word/TXT词库导入；5)单词高亮悬浮释义，点击段落展开翻译。适用于四六级、考研、雅思托福等英语学习场景。" />
+    <meta name="ai:keywords" content="记忆宫殿单词记忆,AI背单词工具,沉浸式英语学习,场景化词汇记忆,中英双语学习" />
+    <meta name="ai:category" content="教育科技,英语学习,AI应用,记忆工具" />
+    
+    <!-- 结构化数据 - JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "记了么",
+      "alternateName": "AI Memory Palace",
+      "description": "AI驱动的记忆宫殿单词记忆工具，通过沉浸式场景故事帮助用户高效记忆英语单词",
+      "url": "https://jileme.com",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "AI自动生成记忆场景",
+        "50+预设场景库",
+        "中英双语切换",
+        "PDF/Word/TXT导入",
+        "单词高亮释义",
+        "段落点击翻译"
+      ],
+      "screenshot": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200",
+      "softwareVersion": "1.0.0",
+      "author": {
+        "@type": "Organization",
+        "name": "记了么"
+      }
+    }
+    </script>
+    
+    <!-- FAQ 结构化数据 - 提升AI检索 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "什么是记忆宫殿？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "记忆宫殿是一种古老的记忆技术，通过将需要记忆的内容与熟悉的空间场景关联，利用空间记忆来增强词汇记忆。记了么将这一技术与AI结合，自动生成沉浸式场景故事。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "记了么如何帮助记忆单词？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "上传单词列表后，AI会分析单词主题，从50个预设场景中选择最匹配的场景，将单词融入生动的中英双语故事中。通过场景联想和故事情节，让单词记忆更加深刻持久。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "支持哪些词库格式？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "支持PDF、Word(.doc/.docx)、TXT文本文件。可以直接上传四六级、考研、雅思托福等词库文件。"
+          }
+        }
+      ]
+    }
+    </script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- 预连接优化 -->
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    
+    <!-- 主题色 -->
+    <meta name="theme-color" content="#4a5d23" />
+    <meta name="msapplication-TileColor" content="#4a5d23" />
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
-"""AI Service - Structured Data Generation"""
+"""AI Service - Structured Data Generation with Smart Image Selection"""
 import json
 import os
 import re
@@ -21,29 +21,45 @@ class TokenUsage:
     timestamp: float
 
 
-BG_IMAGES = [
-    {"url": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=80", "title_zh": "晨光图书馆", "title_en": "Morning Library"},
-    {"url": "https://images.unsplash.com/photo-1574068468668-a05a11f871da?w=1920&q=80", "title_zh": "自然博物馆", "title_en": "Natural Museum"},
-    {"url": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1920&q=80", "title_zh": "医学中心", "title_en": "Medical Center"},
-    {"url": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80", "title_zh": "现代办公室", "title_en": "Modern Office"},
-    {"url": "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=1920&q=80", "title_zh": "城市公园", "title_en": "City Park"},
-]
+# 扩展图片库 - 按主题分类
+BG_IMAGES = {
+    "library": {"url": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=80", "title_zh": "晨光图书馆", "title_en": "Morning Library", "keywords": ["book", "read", "study", "library", "literature", "research"]},
+    "museum": {"url": "https://images.unsplash.com/photo-1574068468668-a05a11f871da?w=1920&q=80", "title_zh": "自然博物馆", "title_en": "Natural Museum", "keywords": ["history", "ancient", "exhibit", "artifact", "discover"]},
+    "hospital": {"url": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1920&q=80", "title_zh": "医学中心", "title_en": "Medical Center", "keywords": ["health", "medical", "doctor", "patient", "cure", "treatment"]},
+    "office": {"url": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80", "title_zh": "现代办公室", "title_en": "Modern Office", "keywords": ["work", "business", "meeting", "project", "career", "job"]},
+    "park": {"url": "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=1920&q=80", "title_zh": "城市公园", "title_en": "City Park", "keywords": ["nature", "tree", "walk", "relax", "outdoor", "green"]},
+    "university": {"url": "https://images.unsplash.com/photo-1562774053-701939374585?w=1920&q=80", "title_zh": "大学校园", "title_en": "University Campus", "keywords": ["education", "student", "learn", "academic", "course", "degree"]},
+    "cafe": {"url": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1920&q=80", "title_zh": "温馨咖啡馆", "title_en": "Cozy Cafe", "keywords": ["coffee", "drink", "chat", "friend", "social", "relax"]},
+    "airport": {"url": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920&q=80", "title_zh": "国际机场", "title_en": "International Airport", "keywords": ["travel", "flight", "journey", "abroad", "international"]},
+    "lab": {"url": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1920&q=80", "title_zh": "科学实验室", "title_en": "Science Lab", "keywords": ["science", "experiment", "research", "chemical", "biology", "genetic"]},
+    "market": {"url": "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1920&q=80", "title_zh": "繁华市场", "title_en": "Busy Market", "keywords": ["buy", "sell", "trade", "price", "shop", "market", "invest"]},
+}
+
+BG_LIST = list(BG_IMAGES.values())  # 用于循环分配
 
 SCENE_PROMPT = """Generate a memory palace scene for vocabulary learning.
 
 ## Words (Total: {word_count}, ALL must appear)
 {words}
 
+## Available scene themes (pick the BEST match for these words)
+library, museum, hospital, office, park, university, cafe, airport, lab, market
+
 ## Output JSON (use [[word]] markers, NO HTML)
 {{
+    "theme": "best_matching_theme",
     "title_zh": "场景中文标题",
-    "title_en": "Scene English Title", 
+    "title_en": "Scene English Title",
     "paragraphs": [
         {{"zh": "中文段落用[[word]]标记", "en": "English with [[word]]", "zh_pure": "纯中文[[关键词]]"}}
     ]
 }}
 
-Rules: Use [[word]] markers. 5-7 paragraphs. ALL {word_count} words must appear. JSON only."""
+Rules: 
+1. Pick theme that best matches the vocabulary
+2. Use [[word]] markers for ALL {word_count} words
+3. 5-7 paragraphs
+4. JSON only"""
 
 
 PRICING = {"MiniMax-Text-01": {"input": 0.0001, "output": 0.0011}}
@@ -131,22 +147,37 @@ class AIService:
 
         print(f"[AI] Words: {len(words)}, Provider: {provider}")
 
-        word_dict = {w['word'].lower(): w for w in words}
         words_per_scene = 40
         num_scenes = min(5, math.ceil(len(words) / words_per_scene))
+        used_themes = set()  # 避免重复使用同一主题
 
         scenes = []
         for i in range(num_scenes):
             scene_words = words[i*words_per_scene : min((i+1)*words_per_scene, len(words))]
             if not scene_words: continue
 
-            bg = BG_IMAGES[i % len(BG_IMAGES)]
             print(f"[AI] Scene {i+1}/{num_scenes}, words: {len(scene_words)}")
 
             raw = self._generate_raw(scene_words, provider)
             if raw:
+                # 获取AI选择的主题，或使用默认
+                theme = raw.get('theme', '').lower()
+                bg = BG_IMAGES.get(theme)
+                
+                # 如果主题无效或已使用，选择下一个可用主题
+                if not bg or theme in used_themes:
+                    for t, b in BG_IMAGES.items():
+                        if t not in used_themes:
+                            bg = b
+                            theme = t
+                            break
+                    else:
+                        bg = BG_LIST[i % len(BG_LIST)]  # 循环使用
+                
+                used_themes.add(theme)
                 scene = self._build_html(raw, scene_words, bg, i+1)
                 scenes.append(scene)
+                print(f"[AI] Scene {i+1} theme: {theme}, bg: {bg['title_en']}")
 
         return {"scenes": scenes}
 
@@ -164,6 +195,8 @@ class AIService:
                 return self._call_deepseek(prompt)
         except Exception as e:
             print(f"[AI] Error: {e}")
+            import traceback
+            traceback.print_exc()
         return None
 
     def _build_html(self, raw, scene_words, bg, scene_id):
@@ -204,7 +237,7 @@ class AIService:
     def _call_minimax(self, prompt):
         model = "MiniMax-Text-01"
         resp = self.minimax_client.messages.create(model=model, max_tokens=4096,
-            system="Generate JSON with [[word]] markers. Output JSON only.",
+            system="Generate JSON with [[word]] markers. Pick best theme. Output JSON only.",
             messages=[{"role": "user", "content": prompt}])
         self._record_usage("minimax", model, resp.usage.input_tokens, resp.usage.output_tokens)
         print(f"[AI] MiniMax: {len(resp.content[0].text)} chars")

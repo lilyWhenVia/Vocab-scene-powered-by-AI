@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Scene() {
@@ -8,6 +8,8 @@ export default function Scene() {
   const [currentScene, setCurrentScene] = useState(0)
   const [lang, setLang] = useState('zh')
   const [cardCollapsed, setCardCollapsed] = useState(false)
+  const [expandedPara, setExpandedPara] = useState(null)
+  const contentRef = useRef(null)
 
   useEffect(() => {
     const historyIndex = localStorage.getItem('currentHistoryIndex')
@@ -43,9 +45,19 @@ export default function Scene() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [data])
 
+  // 切换场景时重置展开状态
+  useEffect(() => {
+    setExpandedPara(null)
+  }, [currentScene])
+
   const prevScene = () => setCurrentScene(s => Math.max(0, s - 1))
   const nextScene = () => setCurrentScene(s => Math.min((data?.scenes?.length || 1) - 1, s + 1))
   const toggleLang = () => setLang(l => l === 'zh' ? 'en' : 'zh')
+
+  // 处理段落点击
+  const handleParaClick = (idx) => {
+    setExpandedPara(expandedPara === idx ? null : idx)
+  }
 
   if (loading) {
     return (
@@ -62,6 +74,16 @@ export default function Scene() {
 
   const scenes = data?.scenes || []
   const scene = scenes[currentScene]
+  const translationParagraphs = scene?.zh?.translationParagraphs || []
+
+  // 解析内容为段落数组
+  const parseContent = (html) => {
+    if (!html) return []
+    const matches = html.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) || []
+    return matches.map(p => p.replace(/<\/?p[^>]*>/gi, ''))
+  }
+
+  const contentParagraphs = parseContent(scene?.[lang]?.content || '')
 
   return (
     <div className="min-h-screen relative">
@@ -84,7 +106,7 @@ export default function Scene() {
             </button>
             <div className="flex items-center gap-2">
               <span className="text-2xl">🌿</span>
-              <span className="text-cream font-bold">记了么</span>
+              <span className="text-gray-800 font-bold">记了么</span>
               {data?.name && <span className="scene-tag ml-2">{data.name}</span>}
             </div>
             <button onClick={() => navigate('/')} className="icon-btn">
@@ -150,14 +172,51 @@ export default function Scene() {
               {/* 快捷键提示 */}
               <div className="flex items-center gap-2 text-xs text-gray-400 mb-4">
                 <i className="fa fa-keyboard-o"></i>
-                <span>按 ← → 翻页，按 L 切换语言，按 ESC 折叠</span>
+                <span>按 ← → 翻页，按 L 切换语言，点击段落查看翻译</span>
               </div>
 
-              {/* 内容 */}
-              <div 
-                className="text-gray-700 leading-relaxed scene-content"
-                dangerouslySetInnerHTML={{ __html: scene?.[lang]?.content || '' }}
-              />
+              {/* 内容 - 支持段落点击展开翻译 */}
+              <div ref={contentRef} className="scene-content">
+                {contentParagraphs.map((para, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`para-wrapper ${expandedPara === idx ? 'expanded' : ''}`}
+                    onClick={() => handleParaClick(idx)}
+                  >
+                    <p 
+                      className="mb-3 text-gray-700 leading-relaxed cursor-pointer"
+                      dangerouslySetInnerHTML={{ __html: para }}
+                    />
+                    {/* 翻译展开区域 */}
+                    <div className={`para-trans ${expandedPara === idx ? 'expanded' : ''}`}>
+                      {/* 中文模式：显示英文对照 + 中文翻译 */}
+                      {lang === 'zh' && (
+                        <>
+                          {parseContent(scene?.en?.content || '')[idx] && (
+                            <div className="trans-en mb-2">
+                              <span className="trans-label">EN:</span>
+                              <span dangerouslySetInnerHTML={{ __html: parseContent(scene.en.content)[idx] }} />
+                            </div>
+                          )}
+                          {translationParagraphs[idx] && (
+                            <div className="trans-cn">
+                              <span className="trans-label">译:</span>
+                              <span dangerouslySetInnerHTML={{ __html: translationParagraphs[idx] }} />
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {/* 英文模式：显示中文翻译 */}
+                      {lang === 'en' && translationParagraphs[idx] && (
+                        <div className="trans-cn">
+                          <span className="trans-label">中:</span>
+                          <span dangerouslySetInnerHTML={{ __html: translationParagraphs[idx] }} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* 场景导航 */}

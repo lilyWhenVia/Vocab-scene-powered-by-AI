@@ -111,17 +111,17 @@ body {
   display: block;
 }
 
-/* 段落样式 */
+/* 段落样式 - 适配白色半透明卡片 */
 .para-wrapper {
   @apply cursor-pointer select-none transition-all duration-300 rounded-xl mb-3 p-3;
 }
 
 .para-wrapper:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(16, 185, 129, 0.08);
 }
 
 .para-wrapper.expanded {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(16, 185, 129, 0.12);
 }
 
 .para-trans {
@@ -136,18 +136,21 @@ body {
   opacity: 1;
   padding-top: 0.75rem;
   margin-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.trans-label {
+  @apply font-bold text-xs mr-1;
+  opacity: 0.7;
 }
 
 .trans-en {
-  @apply pl-3 mb-2;
-  color: #a3c9a8;
+  @apply pl-3 mb-2 text-gray-600;
   border-left: 2px solid #10b981;
 }
 
 .trans-cn {
-  @apply pl-3;
-  color: #c9a227;
+  @apply pl-3 text-amber-700;
   border-left: 2px solid #c9a227;
 }
 

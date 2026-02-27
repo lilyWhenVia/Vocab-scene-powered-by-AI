@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .ai_service import ai_service, ai_config
+from .ai_service import ai_service, ai_config, result_cache
 from .analytics import analytics
 
 app = FastAPI(title="记了么 API")
@@ -158,6 +158,7 @@ def get_admin_stats(key: str):
     return {
         "analytics": analytics.get_stats(),
         "ai_usage": ai_service.get_usage_stats(),
+        "cache": result_cache.get_stats(),
         "available_providers": ai_service.get_available_providers(),
         "ai_config": ai_config.to_dict()
     }

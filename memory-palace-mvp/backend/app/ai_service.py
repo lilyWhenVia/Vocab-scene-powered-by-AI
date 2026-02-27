@@ -71,24 +71,25 @@ SCENES = {
 
 SCENE_LIST = "\n".join([f"{k}. {v['title_en']} - {','.join(v['kw'])}" for k,v in SCENES.items()])
 
-PROMPT = """You are a Memory Palace expert. Create scenes for vocabulary learning.
+PROMPT = """你是记忆宫殿专家。将英文单词分配到场景中创作双语故事。
 
-## TASK
-1. Analyze {word_count} words
-2. Select 1-5 scenes from list (by scene_id 1-50)
-3. Distribute ALL words to scenes
-4. Generate story paragraphs
+任务: 处理{word_count}个单词，选择1-5个场景，创作记忆故事。
 
-## SCENES (select by ID)
+场景列表:
 {scene_list}
 
-## WORDS ({word_count} total, ALL must be used)
+单词({word_count}个，必须全部使用):
 {words}
 
-## OUTPUT JSON
-{{"scenes": [{{"scene_id": 1, "words_in_scene": ["word1","word2"], "paragraphs": [{{"zh": "中文[[word]]", "en": "English [[word]]", "zh_pure": "翻译[[词]]"}}]}}]}}
+输出JSON:
+{{"scenes": [{{"scene_id": 1, "words_in_scene": ["word1"], "paragraphs": [{{"zh": "中文故事[[englishWord]]标记", "en": "English [[word]] story", "zh_pure": "纯中文翻译"}}]}}]}}
 
-RULES: scene_id must be 1-50. No duplicate scenes. ALL words must appear. Use [[word]] markers. 3-5 paragraphs per scene. Max 5 scenes. JSON only."""
+关键规则:
+1. [[]]内必须是英文单词原文如[[ubiquitous]]，不能是中文
+2. 中文故事示例: "一位[[magnanimous]]宽宏大量的老人..."
+3. 每个单词必须出现在words_in_scene和故事中
+4. scene_id 1-50，不重复，最多5场景
+5. 只输出JSON"""
 
 PRICING = {"MiniMax-Text-01": {"input": 0.0001, "output": 0.0011}}
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), ".ai_config.json")
@@ -182,15 +183,16 @@ class AIService:
             print(f"[AI] Scene {i+1}: {info['title_en']} (id={sid}), words: {len(ws)}")
         return result
 
-    def _mark(self, t, wd):
-        def r(m):
-            w = m.group(1)
-            info = wd.get(w.lower())
-            if info:
-                tip = f"{info['word']}: {info.get('pos','')} {info.get('meaning','')}".strip()
-                return f"<span class='word-highlight'>{w}<span class='tooltip'>{tip}</span></span>"
-            return f"<span class='word-highlight'>{w}</span>"
-        return re.sub(r'\[\[([^\]]+)\]\]', r, t or '')
+    def _mark(self, text, word_dict):
+        """强制高亮英文单词"""
+        if not text: return ''
+        result = re.sub(r'\[\[([^\]]+)\]\]', r'\1', text)
+        for wl, info in word_dict.items():
+            w = info['word']
+            tip = f"{w}: {info.get('pos','')} {info.get('meaning','')}".strip().replace('<','&lt;').replace('>','&gt;')
+            repl = f"<span class='word-highlight'>\\1<span class='tooltip'>{tip}</span></span>"
+            result = re.sub(r'\b(' + re.escape(w) + r')\b', repl, result, flags=re.IGNORECASE)
+        return result
 
     def _call(self, prompt, provider):
         try:
